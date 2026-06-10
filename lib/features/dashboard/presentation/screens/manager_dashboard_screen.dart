@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/onfield_bottom_nav.dart';
+import '../../../../core/widgets/onfield_drawer.dart';
 import '../../../../core/router/routes.dart';
 import '../../../location/presentation/providers/location_providers.dart';
 import '../../../tasks/domain/entities/task.dart';
@@ -25,8 +26,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
     final completed = byStatus[TaskStatus.completed] ?? 0;
 
     return Scaffold(
+      drawer: const OnFieldDrawer(),
       appBar: AppBar(
-        leading: const Icon(Icons.menu, color: AppColors.onSurface),
         title: const Text('OnField'),
         actions: const [
           Padding(

@@ -39,7 +39,17 @@ class SocketService {
   }
 
   void disconnect() {
-    _socket?.dispose();
+    final socket = _socket;
     _socket = null;
+    if (socket == null) return;
+    // socket_io_client v3 throws WebSocketConnectionClosed when disposing a
+    // socket whose transport already closed — tear down defensively.
+    try {
+      socket.clearListeners();
+      if (socket.connected) socket.disconnect();
+      socket.dispose();
+    } catch (_) {
+      // Already closed; nothing to clean up.
+    }
   }
 }

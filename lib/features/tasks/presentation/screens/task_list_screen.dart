@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/onfield_bottom_nav.dart';
+import '../../../../core/widgets/onfield_drawer.dart';
 import '../../../../core/router/routes.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../reports/presentation/providers/report_providers.dart';
@@ -30,8 +31,8 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     final pending = ref.watch(pendingReportCountProvider);
 
     return Scaffold(
+      drawer: const OnFieldDrawer(),
       appBar: AppBar(
-        leading: const Icon(Icons.menu, color: AppColors.onSurface),
         title: const Text('OnField'),
         actions: [
           if (isManager)

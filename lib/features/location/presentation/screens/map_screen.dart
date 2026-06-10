@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/onfield_bottom_nav.dart';
+import '../../../../core/widgets/onfield_drawer.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../tasks/presentation/providers/task_list_provider.dart';
 import '../providers/location_providers.dart';
@@ -55,8 +56,8 @@ class MapScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      drawer: const OnFieldDrawer(),
       appBar: AppBar(
-        leading: const Icon(Icons.menu, color: AppColors.onSurface),
         title: const Text('OnField'),
         actions: const [
           Padding(
