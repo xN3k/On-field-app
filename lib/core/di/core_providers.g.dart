@@ -91,6 +91,44 @@ final class NetworkInfoProvider
 
 String _$networkInfoHash() => r'c667a67be9db5d8b7fc0efaacb700a36382fbacc';
 
+/// Live connectivity flag; seeds with the current state then follows changes.
+
+@ProviderFor(isOnline)
+final isOnlineProvider = IsOnlineProvider._();
+
+/// Live connectivity flag; seeds with the current state then follows changes.
+
+final class IsOnlineProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// Live connectivity flag; seeds with the current state then follows changes.
+  IsOnlineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isOnlineProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isOnlineHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return isOnline(ref);
+  }
+}
+
+String _$isOnlineHash() => r'2dd5019850de33bd5cfea2213117a4851410fb62';
+
 @ProviderFor(socketService)
 final socketServiceProvider = SocketServiceProvider._();
 
@@ -170,7 +208,7 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'a68e5b36529f4f48c1629e029d86e32f36301845';
+String _$dioHash() => r'61bfcd00464b6cc272c623615c79afd310051e95';
 
 @ProviderFor(userBox)
 final userBoxProvider = UserBoxProvider._();
@@ -335,3 +373,85 @@ final class LocationBoxProvider
 }
 
 String _$locationBoxHash() => r'923fd92a75145db3a191247063de2b12229bf30b';
+
+@ProviderFor(syncMetaBox)
+final syncMetaBoxProvider = SyncMetaBoxProvider._();
+
+final class SyncMetaBoxProvider
+    extends $FunctionalProvider<Box<String>, Box<String>, Box<String>>
+    with $Provider<Box<String>> {
+  SyncMetaBoxProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'syncMetaBoxProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$syncMetaBoxHash();
+
+  @$internal
+  @override
+  $ProviderElement<Box<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Box<String> create(Ref ref) {
+    return syncMetaBox(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Box<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Box<String>>(value),
+    );
+  }
+}
+
+String _$syncMetaBoxHash() => r'66b9013d09f346f8260019ff332e3d6aa47ea06c';
+
+@ProviderFor(notificationsBox)
+final notificationsBoxProvider = NotificationsBoxProvider._();
+
+final class NotificationsBoxProvider
+    extends $FunctionalProvider<Box<String>, Box<String>, Box<String>>
+    with $Provider<Box<String>> {
+  NotificationsBoxProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'notificationsBoxProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationsBoxHash();
+
+  @$internal
+  @override
+  $ProviderElement<Box<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Box<String> create(Ref ref) {
+    return notificationsBox(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Box<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Box<String>>(value),
+    );
+  }
+}
+
+String _$notificationsBoxHash() => r'b61690d2783e11b7b54efe308fa4c99f1ecdf040';

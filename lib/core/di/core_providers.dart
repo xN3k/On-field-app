@@ -18,6 +18,14 @@ SecureStorage secureStorage(Ref ref) => SecureStorage();
 @Riverpod(keepAlive: true)
 NetworkInfo networkInfo(Ref ref) => NetworkInfo();
 
+/// Live connectivity flag; seeds with the current state then follows changes.
+@Riverpod(keepAlive: true)
+Stream<bool> isOnline(Ref ref) async* {
+  final info = ref.watch(networkInfoProvider);
+  yield await info.isOnline;
+  yield* info.onStatusChange;
+}
+
 @Riverpod(keepAlive: true)
 SocketService socketService(Ref ref) {
   final service = SocketService();
@@ -55,3 +63,10 @@ Box<String> reportsBox(Ref ref) => HiveInit.box(HiveConstants.reportsBox);
 
 @Riverpod(keepAlive: true)
 Box<String> locationBox(Ref ref) => HiveInit.box(HiveConstants.locationBox);
+
+@Riverpod(keepAlive: true)
+Box<String> syncMetaBox(Ref ref) => HiveInit.box(HiveConstants.syncMetaBox);
+
+@Riverpod(keepAlive: true)
+Box<String> notificationsBox(Ref ref) =>
+    HiveInit.box(HiveConstants.notificationsBox);

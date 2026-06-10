@@ -49,16 +49,17 @@ class ReportRepositoryImpl implements ReportRepository {
   }
 
   @override
-  Future<void> syncPending() async {
+  Future<String?> syncPending() async {
     final pending = local.getPending();
-    if (pending.isEmpty || !(await network.isOnline)) return;
+    if (pending.isEmpty || !(await network.isOnline)) return null;
     try {
-      await remote.syncBatch(pending);
+      final batchId = await remote.syncBatch(pending);
       for (final r in pending) {
         await local.put(
           ReportModel.fromEntity(r.copyWith(syncStatus: SyncStatus.synced)),
         );
       }
+      return batchId;
     } catch (_) {
       for (final r in pending) {
         await local.put(
@@ -70,7 +71,45 @@ class ReportRepositoryImpl implements ReportRepository {
           ),
         );
       }
+      return null;
     }
+  }
+
+  @override
+  Future<List<Report>> fetchReports({String? taskId, String? userId}) async {
+    // Unsynced local reports come first so workers always see their queue.
+    final localReports = local
+        .getPending()
+        .where((r) => taskId == null || r.taskId == taskId)
+        .toList();
+    if (!(await network.isOnline)) return localReports;
+    try {
+      final remoteReports =
+          await remote.getReports(taskId: taskId, userId: userId);
+      final localKeys = localReports.map((r) => r.idempotencyKey).toSet();
+      return [
+        ...localReports,
+        ...remoteReports.where((r) => !localKeys.contains(r.idempotencyKey)),
+      ];
+    } catch (_) {
+      return localReports;
+    }
+  }
+
+  @override
+  Future<Report?> getReport(String id) async {
+    if (await network.isOnline) {
+      try {
+        return await remote.getById(id);
+      } catch (_) {
+        // Fall back to the local queue below.
+      }
+    }
+    final cached = local.getAll();
+    for (final r in cached) {
+      if (r.id == id || r.idempotencyKey == id) return r;
+    }
+    return null;
   }
 
   @override

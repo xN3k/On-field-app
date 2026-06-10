@@ -7,6 +7,8 @@ class HiveConstants {
   static const String tasksBox = 'tasks_box';
   static const String reportsBox = 'reports_box';
   static const String locationBox = 'location_box';
+  static const String syncMetaBox = 'sync_meta_box';
+  static const String notificationsBox = 'notifications_box';
 
   // Type ids
   static const int userTypeId = 0;

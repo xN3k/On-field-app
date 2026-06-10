@@ -42,7 +42,7 @@ final class SyncCoordinatorProvider
   SyncCoordinator create() => SyncCoordinator();
 }
 
-String _$syncCoordinatorHash() => r'9e7189acd4a29a462dbdf76365acf78a084334d3';
+String _$syncCoordinatorHash() => r'c4a6ccfa1bb58a28828f43de5363973cd50c7a20';
 
 /// Watches connectivity and drains the offline queues (reports + location
 /// pings) whenever the device comes back online. Kept alive for the app's

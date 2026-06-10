@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/onfield_bottom_nav.dart';
-import '../../../../core/widgets/onfield_drawer.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/offline_banner.dart';
+import '../../../../core/widgets/skeleton.dart';
+import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../reports/presentation/providers/report_providers.dart';
+import '../../../users/presentation/providers/user_providers.dart';
 import '../../domain/entities/task.dart';
 import '../providers/task_list_provider.dart';
 import '../widgets/status_chip.dart';
@@ -22,48 +25,45 @@ class TaskListScreen extends ConsumerStatefulWidget {
 class _TaskListScreenState extends ConsumerState<TaskListScreen> {
   String _query = '';
   TaskStatus? _filter; // null = All
+  String? _assigneeFilter; // manager-only, null = everyone
 
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(taskListProvider);
-    final user = ref.watch(authControllerProvider).value?.user;
-    final isManager = user?.role.isManager ?? false;
     final pending = ref.watch(pendingReportCountProvider);
+    final isManager =
+        ref.watch(authControllerProvider).value?.user?.role.isManager ?? false;
+    final workers =
+        isManager ? ref.watch(workerOptionsProvider).value : null;
 
     return Scaffold(
-      drawer: const OnFieldDrawer(),
       appBar: AppBar(
         title: const Text('OnField'),
         actions: [
-          if (isManager)
-            IconButton(
-              tooltip: 'Dashboard',
-              icon: const Icon(Icons.dashboard_outlined),
-              onPressed: () => context.push(Routes.dashboard),
-            ),
           IconButton(
             icon: Badge(
               isLabelVisible: pending > 0,
               label: Text('$pending'),
               child: const Icon(Icons.notifications_outlined),
             ),
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).logout(),
+            onPressed: () => context.push(Routes.notifications),
           ),
         ],
       ),
-      bottomNavigationBar: const OnFieldBottomNav(current: OnFieldTab.tasks),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        onPressed: () => ref.read(taskListProvider.notifier).refresh(),
-        child: const Icon(Icons.refresh),
-      ),
+      floatingActionButton: isManager
+          ? FloatingActionButton(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              onPressed: () => context.push(Routes.taskCreate),
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: Column(
         children: [
+          const OfflineBanner(),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: TextField(
@@ -87,13 +87,35 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
               ],
             ),
           ),
+          if (isManager && (workers?.isNotEmpty ?? false))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: DropdownButtonFormField<String?>(
+                initialValue: _assigneeFilter,
+                decoration: const InputDecoration(
+                  labelText: 'Assigned To',
+                  isDense: true,
+                ),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All workers'),
+                  ),
+                  for (final User w in workers!)
+                    DropdownMenuItem<String?>(
+                      value: w.id,
+                      child: Text(w.name ?? w.email),
+                    ),
+                ],
+                onChanged: (v) => setState(() => _assigneeFilter = v),
+              ),
+            ),
           const SizedBox(height: 8),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => ref.read(taskListProvider.notifier).refresh(),
               child: tasksAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonList(),
                 error: (e, _) => ListView(
                   children: [
                     const SizedBox(height: 120),
@@ -107,18 +129,25 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                   final filtered = tasks.where((t) {
                     final matchesFilter =
                         _filter == null || t.status == _filter;
+                    final matchesAssignee = _assigneeFilter == null ||
+                        t.assignedToId == _assigneeFilter;
                     final matchesQuery = _query.isEmpty ||
                         t.title.toLowerCase().contains(_query) ||
                         (t.description?.toLowerCase().contains(_query) ??
                             false);
-                    return matchesFilter && matchesQuery;
+                    return matchesFilter && matchesAssignee && matchesQuery;
                   }).toList();
 
                   if (filtered.isEmpty) {
                     return ListView(
                       children: const [
-                        SizedBox(height: 120),
-                        Center(child: Text('No tasks found.')),
+                        SizedBox(height: 60),
+                        EmptyState(
+                          icon: Icons.assignment_outlined,
+                          title: 'No tasks found',
+                          subtitle:
+                              'No tasks assigned yet. Your manager will assign tasks here.',
+                        ),
                       ],
                     );
                   }

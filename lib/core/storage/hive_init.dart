@@ -12,6 +12,8 @@ class HiveInit {
       Hive.openBox<String>(HiveConstants.tasksBox),
       Hive.openBox<String>(HiveConstants.reportsBox),
       Hive.openBox<String>(HiveConstants.locationBox),
+      Hive.openBox<String>(HiveConstants.syncMetaBox),
+      Hive.openBox<String>(HiveConstants.notificationsBox),
     ]);
   }
 

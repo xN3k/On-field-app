@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/location/presentation/providers/location_providers.dart';
 import '../../features/reports/presentation/providers/report_providers.dart';
 import '../di/core_providers.dart';
+import 'sync_status_providers.dart';
 
 part 'sync_coordinator.g.dart';
 
@@ -27,8 +28,13 @@ class SyncCoordinator extends _$SyncCoordinator {
   }
 
   Future<void> _drain() async {
-    await ref.read(reportRepositoryProvider).syncPending();
-    await ref.read(locationRepositoryProvider).drainBuffer();
+    final reportBatch = await ref.read(reportRepositoryProvider).syncPending();
+    final locationBatch =
+        await ref.read(locationRepositoryProvider).drainBuffer();
+    final box = ref.read(syncMetaBoxProvider);
+    for (final id in [reportBatch, locationBatch]) {
+      if (id != null) await recordBatchId(box, id);
+    }
   }
 
   /// Manual trigger (e.g. pull-to-refresh).

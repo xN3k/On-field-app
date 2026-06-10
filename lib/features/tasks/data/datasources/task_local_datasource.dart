@@ -23,6 +23,10 @@ class TaskLocalDataSource {
     await _box.put(task.id, jsonEncode(task.toJson()));
   }
 
+  Future<void> remove(String id) async {
+    await _box.delete(id);
+  }
+
   Stream<List<TaskModel>> watch() async* {
     yield getCached();
     yield* _box.watch().map((_) => getCached());

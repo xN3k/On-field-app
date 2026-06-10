@@ -36,6 +36,31 @@ int pendingReportCount(Ref ref) {
   return queue.where((r) => r.syncStatus != SyncStatus.synced).length;
 }
 
+/// Server history merged with the local unsynced queue.
+@riverpod
+class ReportsList extends _$ReportsList {
+  @override
+  Future<List<Report>> build({String? taskId, String? userId}) =>
+      ref.watch(reportRepositoryProvider).fetchReports(
+            taskId: taskId,
+            userId: userId,
+          );
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(reportRepositoryProvider).fetchReports(
+            taskId: taskId,
+            userId: userId,
+          ),
+    );
+  }
+}
+
+@riverpod
+Future<Report?> reportDetail(Ref ref, String id) =>
+    ref.watch(reportRepositoryProvider).getReport(id);
+
 /// Form controller for submitting a report (offline-capable).
 @riverpod
 class ReportForm extends _$ReportForm {

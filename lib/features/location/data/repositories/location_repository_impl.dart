@@ -36,11 +36,12 @@ class LocationRepositoryImpl implements LocationRepository {
   }
 
   @override
-  Future<void> drainBuffer() async {
-    if (local.isEmpty || !(await network.isOnline)) return;
+  Future<String?> drainBuffer() async {
+    if (local.isEmpty || !(await network.isOnline)) return null;
     final pings = local.drain();
-    await remote.syncBatch(pings);
+    final batchId = await remote.syncBatch(pings);
     await local.clear();
+    return batchId;
   }
 
   @override
@@ -50,4 +51,23 @@ class LocationRepositoryImpl implements LocationRepository {
     required double radiusMeters,
   }) =>
       remote.nearby(lat: lat, lng: lng, radiusMeters: radiusMeters);
+
+  @override
+  Future<List<LocationPing>> history({
+    String? userId,
+    DateTime? from,
+    DateTime? to,
+    int page = 1,
+    int limit = 50,
+  }) =>
+      remote.history(
+        userId: userId,
+        from: from,
+        to: to,
+        page: page,
+        limit: limit,
+      );
+
+  @override
+  Future<LocationPing?> latest(String userId) => remote.latest(userId);
 }

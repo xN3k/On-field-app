@@ -8,26 +8,27 @@ class AppColors {
   AppColors._();
 
   // Surface tiers
-  static const background = Color(0xFFFAF8FF);
-  static const surface = Color(0xFFFAF8FF);
+  static const background = Color(0xFFF4F6FA);
+  static const surface = Color(0xFFF4F6FA);
   static const surfaceContainerLowest = Color(0xFFFFFFFF);
-  static const surfaceContainerLow = Color(0xFFF3F3FE);
-  static const surfaceContainer = Color(0xFFEDEDF9);
-  static const surfaceContainerHigh = Color(0xFFE7E7F3);
-  static const surfaceContainerHighest = Color(0xFFE1E2ED);
+  static const surfaceContainerLow = Color(0xFFF4F6FA);
+  static const surfaceContainer = Color(0xFFEDF0F7);
+  static const surfaceContainerHigh = Color(0xFFE6EAF2);
+  static const surfaceContainerHighest = Color(0xFFDFE4EE);
 
   // Text
-  static const onSurface = Color(0xFF191B23);
-  static const onSurfaceVariant = Color(0xFF434655);
+  static const onSurface = Color(0xFF111827);
+  static const onSurfaceVariant = Color(0xFF6B7280);
 
   // Outline / borders
-  static const outline = Color(0xFF737686);
-  static const outlineVariant = Color(0xFFC3C6D7);
+  static const outline = Color(0xFF9CA3AF);
+  static const outlineVariant = Color(0xFFC7CDD9);
   static const border = Color(0xFFE2E8F0);
 
   // Brand / primary
-  static const primary = Color(0xFF004AC6);
-  static const primaryContainer = Color(0xFF2563EB);
+  static const primary = Color(0xFF1B4FA8);
+  static const primaryDark = Color(0xFF0F2D6B);
+  static const primaryContainer = Color(0xFF2E63C9);
   static const onPrimary = Color(0xFFFFFFFF);
 
   // Semantic
@@ -38,10 +39,12 @@ class AppColors {
   static const info = primaryContainer;
   static const infoContainer = Color(0xFFDBE7FF);
 
-  static const warning = Color(0xFFB45309);
+  static const warning = Color(0xFFD97706);
   static const warningContainer = Color(0xFFFEF3C7);
 
-  static const error = Color(0xFFBA1A1A);
+  static const pendingGray = Color(0xFF9CA3AF);
+
+  static const error = Color(0xFFDC2626);
   static const errorContainer = Color(0xFFFFDAD6);
   static const onErrorContainer = Color(0xFF93000A);
 }
@@ -135,7 +138,7 @@ class AppTheme {
           fontFamily: 'Inter',
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: AppColors.primaryContainer,
+          color: AppColors.primaryDark,
         ),
       ),
       cardTheme: CardThemeData(

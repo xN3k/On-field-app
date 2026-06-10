@@ -242,6 +242,181 @@ final class PendingReportCountProvider
 String _$pendingReportCountHash() =>
     r'8eb1c1d23118521a00b31b72d63875af238a4b3c';
 
+/// Server history merged with the local unsynced queue.
+
+@ProviderFor(ReportsList)
+final reportsListProvider = ReportsListFamily._();
+
+/// Server history merged with the local unsynced queue.
+final class ReportsListProvider
+    extends $AsyncNotifierProvider<ReportsList, List<Report>> {
+  /// Server history merged with the local unsynced queue.
+  ReportsListProvider._({
+    required ReportsListFamily super.from,
+    required ({String? taskId, String? userId}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'reportsListProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$reportsListHash();
+
+  @override
+  String toString() {
+    return r'reportsListProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  ReportsList create() => ReportsList();
+
+  @override
+  bool operator ==(Object other) {
+    return other is ReportsListProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$reportsListHash() => r'568935b47719056cd59ce024c27b3ae35fd51d5d';
+
+/// Server history merged with the local unsynced queue.
+
+final class ReportsListFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          ReportsList,
+          AsyncValue<List<Report>>,
+          List<Report>,
+          FutureOr<List<Report>>,
+          ({String? taskId, String? userId})
+        > {
+  ReportsListFamily._()
+    : super(
+        retry: null,
+        name: r'reportsListProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Server history merged with the local unsynced queue.
+
+  ReportsListProvider call({String? taskId, String? userId}) =>
+      ReportsListProvider._(
+        argument: (taskId: taskId, userId: userId),
+        from: this,
+      );
+
+  @override
+  String toString() => r'reportsListProvider';
+}
+
+/// Server history merged with the local unsynced queue.
+
+abstract class _$ReportsList extends $AsyncNotifier<List<Report>> {
+  late final _$args = ref.$arg as ({String? taskId, String? userId});
+  String? get taskId => _$args.taskId;
+  String? get userId => _$args.userId;
+
+  FutureOr<List<Report>> build({String? taskId, String? userId});
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Report>>, List<Report>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Report>>, List<Report>>,
+              AsyncValue<List<Report>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(
+      ref,
+      () => build(taskId: _$args.taskId, userId: _$args.userId),
+    );
+  }
+}
+
+@ProviderFor(reportDetail)
+final reportDetailProvider = ReportDetailFamily._();
+
+final class ReportDetailProvider
+    extends $FunctionalProvider<AsyncValue<Report?>, Report?, FutureOr<Report?>>
+    with $FutureModifier<Report?>, $FutureProvider<Report?> {
+  ReportDetailProvider._({
+    required ReportDetailFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'reportDetailProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$reportDetailHash();
+
+  @override
+  String toString() {
+    return r'reportDetailProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Report?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Report?> create(Ref ref) {
+    final argument = this.argument as String;
+    return reportDetail(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ReportDetailProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$reportDetailHash() => r'fbb4c827953249b30f6215ba4a935c9cfd2eadd7';
+
+final class ReportDetailFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Report?>, String> {
+  ReportDetailFamily._()
+    : super(
+        retry: null,
+        name: r'reportDetailProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ReportDetailProvider call(String id) =>
+      ReportDetailProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'reportDetailProvider';
+}
+
 /// Form controller for submitting a report (offline-capable).
 
 @ProviderFor(ReportForm)

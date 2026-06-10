@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/core_providers.dart';
@@ -26,6 +27,16 @@ LocationRepository locationRepository(Ref ref) => LocationRepositoryImpl(
       network: ref.watch(networkInfoProvider),
     );
 
+/// Radius filter for the live map's nearby seed, in meters.
+/// `null` means "All" (a wide default radius).
+@Riverpod(keepAlive: true)
+class MapRadiusFilter extends _$MapRadiusFilter {
+  @override
+  double? build() => null;
+
+  void set(double? radiusMeters) => state = radiusMeters;
+}
+
 /// Live team positions for the manager map: seeded from the nearby endpoint,
 /// then kept current by `location:update` socket events.
 @riverpod
@@ -34,15 +45,25 @@ class TeamLocations extends _$TeamLocations {
   Stream<List<LocationPing>> build() {
     final repo = ref.watch(locationRepositoryProvider);
     final socket = ref.watch(socketServiceProvider);
+    final radius = ref.watch(mapRadiusFilterProvider);
     final byUser = <String, LocationPing>{};
     final controller = StreamController<List<LocationPing>>();
 
     Future<void> seed() async {
       try {
+        // Seed around the device position; fall back to a wide net at the
+        // last known position when GPS is unavailable.
+        var lat = 37.7749, lng = -122.4194;
+        try {
+          final pos = await Geolocator.getLastKnownPosition() ??
+              await Geolocator.getCurrentPosition();
+          lat = pos.latitude;
+          lng = pos.longitude;
+        } catch (_) {}
         final seedList = await repo.nearby(
-          lat: 37.7749,
-          lng: -122.4194,
-          radiusMeters: 50000,
+          lat: lat,
+          lng: lng,
+          radiusMeters: radius ?? 50000,
         );
         for (final p in seedList) {
           if (p.userId != null) byUser[p.userId!] = p;
@@ -72,5 +93,43 @@ class TeamLocations extends _$TeamLocations {
 
     seed();
     return controller.stream;
+  }
+}
+
+/// Most recent position for a single worker (manager map bottom sheet).
+@riverpod
+Future<LocationPing?> latestLocation(Ref ref, String userId) =>
+    ref.watch(locationRepositoryProvider).latest(userId);
+
+/// Paged ping history for a worker, accumulated across "Load more" calls.
+@riverpod
+class LocationHistory extends _$LocationHistory {
+  int _page = 1;
+  bool _exhausted = false;
+  static const _pageSize = 50;
+
+  bool get exhausted => _exhausted;
+
+  @override
+  Future<List<LocationPing>> build(String userId) {
+    _page = 1;
+    _exhausted = false;
+    return _fetch(1);
+  }
+
+  Future<List<LocationPing>> _fetch(int page) async {
+    final items = await ref
+        .read(locationRepositoryProvider)
+        .history(userId: userId, page: page, limit: _pageSize);
+    if (items.length < _pageSize) _exhausted = true;
+    return items;
+  }
+
+  Future<void> loadMore() async {
+    if (_exhausted || state.isLoading) return;
+    final current = state.value ?? const <LocationPing>[];
+    final next = await _fetch(_page + 1);
+    _page++;
+    state = AsyncData([...current, ...next]);
   }
 }

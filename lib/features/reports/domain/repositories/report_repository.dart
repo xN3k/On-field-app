@@ -9,7 +9,14 @@ abstract class ReportRepository {
   });
 
   /// Pushes all pending/failed reports to the server.
-  Future<void> syncPending();
+  /// Returns the sync batch id when a batch was submitted.
+  Future<String?> syncPending();
+
+  /// Server-side report history, merged with the local unsynced queue.
+  Future<List<Report>> fetchReports({String? taskId, String? userId});
+
+  /// Single report by server id, falling back to the local queue.
+  Future<Report?> getReport(String id);
 
   /// Count of reports not yet synced (for the badge).
   int pendingCount();

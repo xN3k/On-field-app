@@ -49,6 +49,33 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
+  Future<Task> createTask(Map<String, dynamic> body) async {
+    final task = await remote.createTask(body);
+    await local.upsert(task);
+    return task;
+  }
+
+  @override
+  Future<Task> updateTask(String id, Map<String, dynamic> patch) async {
+    final task = await remote.updateTask(id, patch);
+    await local.upsert(task);
+    return task;
+  }
+
+  @override
+  Future<Task> assignTask(String id, String assignedToId) async {
+    final task = await remote.assignTask(id, assignedToId);
+    await local.upsert(task);
+    return task;
+  }
+
+  @override
+  Future<void> deleteTask(String id) async {
+    await remote.deleteTask(id);
+    await local.remove(id);
+  }
+
+  @override
   Stream<List<Task>> watchTasks() =>
       local.watch().map((list) => list.cast<Task>());
 

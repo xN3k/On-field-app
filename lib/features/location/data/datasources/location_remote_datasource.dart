@@ -14,11 +14,46 @@ class LocationRemoteDataSource {
   }
 
   /// Sends a buffered batch via the offline sync endpoint.
-  Future<void> syncBatch(List<LocationPingModel> pings) async {
-    await _dio.post<dynamic>(
+  /// Returns the server-assigned batch id (for status tracking).
+  Future<String?> syncBatch(List<LocationPingModel> pings) async {
+    final res = await _dio.post<Map<String, dynamic>>(
       ApiConstants.syncBatch,
       data: {'locations': pings.map((p) => p.toRequestJson()).toList()},
     );
+    final data = unwrap<dynamic>(res);
+    return data is Map<String, dynamic> ? data['batchId'] as String? : null;
+  }
+
+  /// Paged history of a worker's pings (managers may pass any userId).
+  Future<List<LocationPingModel>> history({
+    String? userId,
+    DateTime? from,
+    DateTime? to,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      ApiConstants.locationHistory,
+      queryParameters: {
+        'userId': ?userId,
+        'from': ?from?.toIso8601String(),
+        'to': ?to?.toIso8601String(),
+        'page': page,
+        'limit': limit,
+      },
+    );
+    final data = unwrap<List<dynamic>>(res);
+    return data
+        .map((e) => LocationPingModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<LocationPingModel?> latest(String userId) async {
+    final res = await _dio
+        .get<Map<String, dynamic>>(ApiConstants.locationLatest(userId));
+    final data = unwrap<dynamic>(res);
+    if (data == null) return null;
+    return LocationPingModel.fromJson(data as Map<String, dynamic>);
   }
 
   Future<List<LocationPingModel>> nearby({

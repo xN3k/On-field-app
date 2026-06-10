@@ -24,7 +24,8 @@ class ReportModel extends Report {
       );
 
   factory ReportModel.fromJson(Map<String, dynamic> json) => ReportModel(
-        idempotencyKey: json['idempotencyKey'] as String,
+        idempotencyKey:
+            (json['idempotencyKey'] ?? json['id']) as String,
         taskId: json['taskId'] as String,
         payload: Map<String, dynamic>.from(json['payload'] as Map),
         syncStatus:

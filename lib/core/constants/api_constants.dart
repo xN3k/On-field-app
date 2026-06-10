@@ -23,18 +23,28 @@ class ApiConstants {
   static const String logout = '/auth/logout';
   static const String me = '/auth/me';
 
+  // Users
+  static const String users = '/users';
+  static String userById(String id) => '/users/$id';
+  static const String deviceToken = '/users/me/device-token';
+
   // Tasks
   static const String tasks = '/tasks';
   static String taskById(String id) => '/tasks/$id';
   static String taskStatus(String id) => '/tasks/$id/status';
+  static String taskAssign(String id) => '/tasks/$id/assign';
 
   // Location
   static const String location = '/location';
   static const String locationNearby = '/location/nearby';
+  static const String locationHistory = '/location/history';
+  static String locationLatest(String userId) => '/location/$userId/latest';
 
   // Reports
   static const String reports = '/reports';
+  static String reportById(String id) => '/reports/$id';
 
   // Sync
   static const String syncBatch = '/sync/batch';
+  static String syncBatchById(String id) => '/sync/batch/$id';
 }

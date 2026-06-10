@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/offline_banner.dart';
 import '../providers/report_providers.dart';
 
 class ReportFormScreen extends ConsumerStatefulWidget {
@@ -47,12 +48,17 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
     final submitting = ref.watch(reportFormProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Field Report')),
+      appBar: AppBar(title: const Text('Submit Report')),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            const OfflineBanner(
+              message:
+                  "You're offline — this report will sync automatically when connected.",
+            ),
+            const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _condition,
               decoration: const InputDecoration(labelText: 'Site condition'),
@@ -77,7 +83,7 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: submitting ? null : _submit,
-              child: Text(submitting ? 'Submitting…' : 'Submit report'),
+              child: Text(submitting ? 'Submitting…' : 'Submit Report'),
             ),
           ],
         ),

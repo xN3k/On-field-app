@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/location/geofence_helper.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/avatar_chip.dart';
+import '../../../../core/widgets/map_overlays.dart';
+import '../../../../core/widgets/report_card.dart';
+import '../../../../core/widgets/status_badge.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
+import '../../../reports/presentation/providers/report_providers.dart';
+import '../../../users/presentation/providers/user_providers.dart';
 import '../../domain/entities/task.dart';
+import '../providers/task_form_provider.dart';
 import '../providers/task_list_provider.dart';
-import '../widgets/status_chip.dart';
 
 class TaskDetailScreen extends ConsumerWidget {
   const TaskDetailScreen({required this.taskId, super.key});
@@ -16,16 +26,55 @@ class TaskDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final taskAsync = ref.watch(taskDetailProvider(taskId));
+    final isManager =
+        ref.watch(authControllerProvider).value?.user?.role.isManager ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Details'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined,
-                color: AppColors.onSurfaceVariant),
-            onPressed: () {},
-          ),
+          if (isManager)
+            PopupMenuButton<String>(
+              onSelected: (action) async {
+                switch (action) {
+                  case 'edit':
+                    context.push(Routes.taskEditPath(taskId));
+                  case 'reassign':
+                    context.push(Routes.taskReassignPath(taskId));
+                  case 'delete':
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete task?'),
+                        content: const Text(
+                            'This permanently removes the task and cannot be undone.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.error),
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true &&
+                        await ref.read(taskFormProvider.notifier).delete(taskId) &&
+                        context.mounted) {
+                      context.pop();
+                    }
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'edit', child: Text('Edit Task')),
+                PopupMenuItem(value: 'reassign', child: Text('Reassign')),
+                PopupMenuItem(value: 'delete', child: Text('Delete')),
+              ],
+            ),
         ],
       ),
       body: taskAsync.when(
@@ -34,15 +83,16 @@ class TaskDetailScreen extends ConsumerWidget {
         data: (task) => _TaskBody(task: task),
       ),
       bottomNavigationBar: taskAsync.maybeWhen(
-        data: (task) => _BottomAction(task: task),
+        data: (task) =>
+            isManager ? _ManagerActions(task: task) : _WorkerAction(task: task),
         orElse: () => null,
       ),
     );
   }
 }
 
-class _BottomAction extends ConsumerWidget {
-  const _BottomAction({required this.task});
+class _WorkerAction extends ConsumerWidget {
+  const _WorkerAction({required this.task});
 
   final Task task;
 
@@ -57,27 +107,78 @@ class _BottomAction extends ConsumerWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: next == null
-            ? OutlinedButton.icon(
-                icon: const Icon(Icons.description_outlined),
-                label: const Text('Add Report'),
-                onPressed: () =>
-                    context.push(Routes.reportFormPath(task.id)),
-              )
-            : FilledButton.icon(
-                icon: Icon(next == TaskStatus.completed
-                    ? Icons.check_circle_outline
-                    : Icons.play_arrow),
-                label: Text(next == TaskStatus.completed
-                    ? 'Complete Task'
-                    : 'Start Task'),
-                onPressed: () async {
-                  await ref
-                      .read(taskListProvider.notifier)
-                      .updateStatus(task.id, next);
-                  ref.invalidate(taskDetailProvider(task.id));
-                },
+        child: Row(
+          children: [
+            if (task.status == TaskStatus.inProgress) ...[
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.description_outlined),
+                  label: const Text('Add Report'),
+                  onPressed: () => context.push(Routes.reportFormPath(task.id)),
+                ),
               ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: next == null
+                  ? OutlinedButton.icon(
+                      icon: const Icon(Icons.description_outlined),
+                      label: const Text('Add Report'),
+                      onPressed: () =>
+                          context.push(Routes.reportFormPath(task.id)),
+                    )
+                  : FilledButton.icon(
+                      icon: Icon(next == TaskStatus.completed
+                          ? Icons.check_circle_outline
+                          : Icons.play_arrow),
+                      label: Text(next == TaskStatus.completed
+                          ? 'Mark Complete'
+                          : 'Start Task'),
+                      onPressed: () async {
+                        await ref
+                            .read(taskListProvider.notifier)
+                            .updateStatus(task.id, next);
+                        ref.invalidate(taskDetailProvider(task.id));
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ManagerActions extends StatelessWidget {
+  const _ManagerActions({required this.task});
+
+  final Task task;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('Edit Task'),
+                onPressed: () => context.push(Routes.taskEditPath(task.id)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('Reassign'),
+                onPressed: () =>
+                    context.push(Routes.taskReassignPath(task.id)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -90,43 +191,41 @@ class _TaskBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final directory = ref.watch(userDirectoryProvider).value ?? const {};
+    final assignee = directory[task.assignedToId];
+    final reportsAsync =
+        ref.watch(reportsListProvider(taskId: task.id));
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        // Header card: title + priority/status pills.
         _card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      task.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(fontSize: 22),
-                    ),
-                  ),
-                ],
+              Text(
+                task.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium
+                    ?.copyWith(fontSize: 22),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
-                  if (task.description != null)
-                    Expanded(
-                      child: Text(
-                        task.description!.split('\n').first,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    )
-                  else
-                    const Spacer(),
-                  StatusChip(task.status),
+                  AvatarChip(
+                    name: assignee?.name ?? assignee?.email,
+                    radius: 14,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      assignee?.name ?? assignee?.email ?? 'Assigned worker',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  StatusBadge(task.status),
                 ],
               ),
             ],
@@ -134,48 +233,11 @@ class _TaskBody extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
 
-        // Map / navigation block.
         if (task.hasGeofence) ...[
-          Container(
-            height: 220,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD6D6F2),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.radio_button_unchecked,
-                      color: Colors.white, size: 28),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryContainer,
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                  ),
-                  icon: const Icon(Icons.navigation_outlined, size: 18),
-                  label: const Text('Start Navigation'),
-                  onPressed: () => context.push(Routes.map),
-                ),
-              ],
-            ),
-          ),
+          _GeofenceMap(task: task),
           const SizedBox(height: 16),
         ],
 
-        // Assigned / Distance info tiles.
         Row(
           children: [
             Expanded(
@@ -183,9 +245,8 @@ class _TaskBody extends ConsumerWidget {
                 context,
                 icon: Icons.event_outlined,
                 label: 'ASSIGNED',
-                value: task.createdAt != null
-                    ? _fmtDate(task.createdAt!)
-                    : '—',
+                value:
+                    task.createdAt != null ? _fmtDate(task.createdAt!) : '—',
               ),
             ),
             const SizedBox(width: 16),
@@ -212,13 +273,12 @@ class _TaskBody extends ConsumerWidget {
           ),
         const SizedBox(height: 16),
 
-        // Task instructions.
         if (task.description != null) ...[
           _card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionLabel('TASK INSTRUCTIONS'),
+                _sectionLabel('DESCRIPTION'),
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 12),
@@ -235,114 +295,38 @@ class _TaskBody extends ConsumerWidget {
           const SizedBox(height: 16),
         ],
 
-        // Activity history timeline.
         _card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionLabel('ACTIVITY HISTORY'),
-              const SizedBox(height: 16),
-              ..._timeline(context),
+              _sectionLabel('REPORTS'),
+              const SizedBox(height: 12),
+              ...reportsAsync.when(
+                loading: () => const [LinearProgressIndicator()],
+                error: (e, _) => [Text('Failed to load reports: $e')],
+                data: (reports) => reports.isEmpty
+                    ? [
+                        Text('No reports submitted for this task yet.',
+                            style: Theme.of(context).textTheme.bodyMedium),
+                      ]
+                    : [
+                        for (final r in reports) ...[
+                          ReportCard(
+                            report: r,
+                            taskTitle: task.title,
+                            onTap: r.id != null
+                                ? () => context
+                                    .push(Routes.reportDetailPath(r.id!))
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+              ),
             ],
           ),
         ),
       ],
-    );
-  }
-
-  List<Widget> _timeline(BuildContext context) {
-    final entries = <(String, String, bool)>[
-      if (task.status == TaskStatus.completed)
-        ('Completed (Current)', 'Task finished', true),
-      if (task.status == TaskStatus.inProgress)
-        ('Started (Current)', 'In progress', true),
-      ('Assigned', 'Assigned to worker', task.status == TaskStatus.pending),
-      (
-        'Task Created',
-        task.createdAt != null ? _fmtDate(task.createdAt!) : '—',
-        false
-      ),
-    ];
-
-    return [
-      for (var i = 0; i < entries.length; i++)
-        _timelineRow(
-          context,
-          title: entries[i].$1,
-          subtitle: entries[i].$2,
-          active: entries[i].$3,
-          isLast: i == entries.length - 1,
-        ),
-    ];
-  }
-
-  Widget _timelineRow(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required bool active,
-    required bool isLast,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: active
-                      ? AppColors.primaryContainer
-                      : AppColors.surfaceContainerHighest,
-                  shape: BoxShape.circle,
-                ),
-                child: active
-                    ? const Center(
-                        child: CircleAvatar(
-                            radius: 4, backgroundColor: Colors.white),
-                      )
-                    : const Icon(Icons.check,
-                        size: 12, color: AppColors.onSurfaceVariant),
-              ),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: AppColors.border,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: active
-                            ? AppColors.onSurface
-                            : AppColors.onSurfaceVariant,
-                      )),
-                  const SizedBox(height: 2),
-                  Text(subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
-                      )),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -412,5 +396,108 @@ class _TaskBody extends ConsumerWidget {
     final ampm = d.hour < 12 ? 'AM' : 'PM';
     final m = d.minute.toString().padLeft(2, '0');
     return '${d.month}/${d.day}, $h:$m $ampm';
+  }
+}
+
+/// Mini-map with the geofence overlay and an inside/outside-zone chip.
+class _GeofenceMap extends StatefulWidget {
+  const _GeofenceMap({required this.task});
+
+  final Task task;
+
+  @override
+  State<_GeofenceMap> createState() => _GeofenceMapState();
+}
+
+class _GeofenceMapState extends State<_GeofenceMap> {
+  bool? _inside;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkZone();
+  }
+
+  Future<void> _checkZone() async {
+    try {
+      final pos = await Geolocator.getLastKnownPosition() ??
+          await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _inside = GeofenceHelper.isInside(
+          pos.latitude,
+          pos.longitude,
+          widget.task.geofenceLat!,
+          widget.task.geofenceLng!,
+          widget.task.geofenceRadius ?? 100,
+        );
+      });
+    } catch (_) {
+      // Location unavailable — leave the chip hidden.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final task = widget.task;
+    final center = LatLng(task.geofenceLat!, task.geofenceLng!);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: SizedBox(
+        height: 220,
+        child: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: CameraPosition(target: center, zoom: 15),
+              circles: {
+                geofenceCircle(
+                  id: task.id,
+                  center: center,
+                  radiusMeters: (task.geofenceRadius ?? 100).toDouble(),
+                ),
+              },
+              polylines: {
+                geofenceOutline(
+                  id: task.id,
+                  center: center,
+                  radiusMeters: (task.geofenceRadius ?? 100).toDouble(),
+                ),
+              },
+              markers: {
+                Marker(markerId: MarkerId(task.id), position: center),
+              },
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: false,
+              liteModeEnabled: true,
+            ),
+            if (_inside != null)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _inside!
+                        ? AppColors.successContainer
+                        : AppColors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: Text(
+                    _inside! ? 'Inside zone ✓' : 'Outside zone',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: _inside!
+                          ? AppColors.onSuccessContainer
+                          : AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }

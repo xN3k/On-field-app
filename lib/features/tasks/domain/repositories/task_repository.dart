@@ -9,6 +9,12 @@ abstract class TaskRepository {
 
   Future<Task> updateStatus(String id, TaskStatus status);
 
+  /// Online-only manager/admin writes.
+  Future<Task> createTask(Map<String, dynamic> body);
+  Future<Task> updateTask(String id, Map<String, dynamic> patch);
+  Future<Task> assignTask(String id, String assignedToId);
+  Future<void> deleteTask(String id);
+
   /// Emits whenever the local task cache changes (remote fetch or socket push).
   Stream<List<Task>> watchTasks();
 }
