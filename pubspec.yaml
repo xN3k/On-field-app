@@ -1,0 +1,54 @@
+name: onfield
+description: "OnField — Field Workforce Management mobile app."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State management / DI (Riverpod 3, codegen only)
+  flutter_riverpod: ^3.0.0
+  riverpod_annotation: ^4.0.0
+
+  # Networking
+  dio: ^5.7.0
+  socket_io_client: ^3.0.2
+
+  # Offline-first storage
+  hive_ce: ^2.11.3
+  hive_ce_flutter: ^2.3.1
+  flutter_secure_storage: ^10.3.1
+
+  # Maps & location
+  google_maps_flutter: ^2.9.0
+  geolocator: ^14.0.2
+
+  # Navigation
+  go_router: ^17.3.0
+
+  # Background work & connectivity
+  workmanager: ^0.9.0+3
+  connectivity_plus: ^7.1.1
+  permission_handler: ^12.0.3
+
+  # Utils
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  build_runner: ^2.4.13
+  riverpod_generator: ^4.0.0+1
+  riverpod_lint: ^3.0.0
+  custom_lint: ^0.8.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
