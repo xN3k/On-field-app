@@ -27,8 +27,17 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
   final _current = TextEditingController();
   final _next = TextEditingController();
   final _confirm = TextEditingController();
-  bool _obscure = true;
+  bool _obscureCurrent = true;
+  bool _obscureNext = true;
+  bool _obscureConfirm = true;
   bool _submitting = false;
+
+  Widget _visibilityToggle(bool obscured, VoidCallback onToggle) {
+    return IconButton(
+      icon: Icon(obscured ? Icons.visibility : Icons.visibility_off),
+      onPressed: onToggle,
+    );
+  }
 
   @override
   void dispose() {
@@ -72,10 +81,14 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _current,
-              obscureText: _obscure,
-              decoration: const InputDecoration(
+              obscureText: _obscureCurrent,
+              decoration: InputDecoration(
                 labelText: 'Current password',
-                prefixIcon: Icon(Icons.lock_outline),
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: _visibilityToggle(
+                  _obscureCurrent,
+                  () => setState(() => _obscureCurrent = !_obscureCurrent),
+                ),
               ),
               validator: (v) =>
                   (v == null || v.isEmpty) ? 'Enter your current password' : null,
@@ -83,14 +96,13 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _next,
-              obscureText: _obscure,
+              obscureText: _obscureNext,
               decoration: InputDecoration(
                 labelText: 'New password',
                 prefixIcon: const Icon(Icons.lock_reset),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                      _obscure ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => setState(() => _obscure = !_obscure),
+                suffixIcon: _visibilityToggle(
+                  _obscureNext,
+                  () => setState(() => _obscureNext = !_obscureNext),
                 ),
               ),
               validator: (v) =>
@@ -99,10 +111,14 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _confirm,
-              obscureText: _obscure,
-              decoration: const InputDecoration(
+              obscureText: _obscureConfirm,
+              decoration: InputDecoration(
                 labelText: 'Confirm new password',
-                prefixIcon: Icon(Icons.lock_outline),
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: _visibilityToggle(
+                  _obscureConfirm,
+                  () => setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
               ),
               validator: (v) =>
                   v != _next.text ? 'Passwords do not match' : null,
