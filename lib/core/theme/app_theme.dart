@@ -126,6 +126,17 @@ class AppTheme {
     );
 
     return base.copyWith(
+      // No page route transitions anywhere in the app.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _NoTransitionsBuilder(),
+          TargetPlatform.iOS: _NoTransitionsBuilder(),
+          TargetPlatform.macOS: _NoTransitionsBuilder(),
+          TargetPlatform.windows: _NoTransitionsBuilder(),
+          TargetPlatform.linux: _NoTransitionsBuilder(),
+          TargetPlatform.fuchsia: _NoTransitionsBuilder(),
+        },
+      ),
       textTheme: _textTheme(base.textTheme),
       appBarTheme: const AppBarTheme(
         centerTitle: true,
@@ -287,4 +298,22 @@ class AppTheme {
   }
 
   static ThemeData get dark => light; // single-mode for now
+}
+
+/// Page transitions builder that renders the destination instantly, with no
+/// slide/fade animation. Applied to every platform so route changes (including
+/// auth redirects) appear immediately.
+class _NoTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
 }

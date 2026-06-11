@@ -65,8 +65,11 @@ GoRouter router(Ref ref) {
       final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
 
-      // While resolving the session, hold on the splash screen.
+      // While resolving the session, hold on the splash screen — but never
+      // bounce the login screen to splash (a failed/in-flight login attempt
+      // flips auth to loading; redirecting would flash the splash screen).
       if (auth.isLoading || !auth.hasValue) {
+        if (location == Routes.login) return null;
         return location == Routes.splash ? null : Routes.splash;
       }
 
