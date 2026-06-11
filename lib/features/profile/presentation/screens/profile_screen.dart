@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/avatar_chip.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../notifications/presentation/providers/notification_providers.dart';
+import '../widgets/change_password_sheet.dart';
 
 /// Profile / account screen for all roles.
 class ProfileScreen extends ConsumerWidget {
@@ -53,12 +53,7 @@ class ProfileScreen extends ConsumerWidget {
                   leading: const Icon(Icons.lock_outline),
                   title: const Text('Change Password'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => AppToast.info(
-                    context,
-                    'Change Password',
-                    message:
-                        'Password changes are managed by your administrator.',
-                  ),
+                  onTap: () => showChangePasswordSheet(context),
                 ),
                 const Divider(height: 1),
                 SwitchListTile(

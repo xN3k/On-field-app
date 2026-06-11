@@ -5,6 +5,10 @@ abstract class AuthRepository {
   Future<AuthSession> login(String email, String password);
   Future<void> logout();
 
+  /// Changes the signed-in user's password. Throws on failure (e.g. the
+  /// current password is incorrect).
+  Future<void> changePassword(String currentPassword, String newPassword);
+
   /// Returns the cached user if a valid session exists, else null.
   Future<User?> currentUser();
 

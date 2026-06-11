@@ -38,6 +38,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    await remote.changePassword(currentPassword, newPassword);
+  }
+
+  @override
   Future<User?> currentUser() async {
     final cached = local.getCachedUser();
     if (cached != null) return cached;

@@ -37,6 +37,29 @@ class AuthRemoteDataSource {
     }
   }
 
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    try {
+      await _dio.post<void>(
+        ApiConstants.changePassword,
+        data: {
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        },
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw AuthException('Current password is incorrect');
+      }
+      throw ServerException(
+        e.message ?? 'Could not change password',
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
   Future<UserModel> me() async {
     final res = await _dio.get<Map<String, dynamic>>(ApiConstants.me);
     return UserModel.fromJson(unwrap<Map<String, dynamic>>(res));

@@ -43,6 +43,19 @@ class AuthController extends _$AuthController {
     });
   }
 
+  /// Changes the current user's password. Throws on failure so callers can
+  /// surface the error. On success the backend revokes all sessions, so the
+  /// user is signed out and must log in again with the new password.
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    await ref
+        .read(authRepositoryProvider)
+        .changePassword(currentPassword, newPassword);
+    await logout();
+  }
+
   Future<void> logout() async {
     await ref.read(authRepositoryProvider).logout();
     ref.read(socketServiceProvider).disconnect();
