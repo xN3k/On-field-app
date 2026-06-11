@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/avatar_chip.dart';
 import '../../../../core/widgets/map_overlays.dart';
 import '../../../auth/domain/entities/user.dart';
@@ -57,12 +58,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_assignee == null || _pin == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_assignee == null
-              ? 'Select a worker to assign this task to.'
-              : 'Tap the map to set the geofence location.'),
-        ),
+      AppToast.warning(
+        context,
+        'Missing details',
+        message: _assignee == null
+            ? 'Select a worker to assign this task to.'
+            : 'Tap the map to set the geofence location.',
       );
       return;
     }
@@ -81,15 +82,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         : await notifier.create(body);
     if (!mounted) return;
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_isEdit ? 'Task updated' : 'Task created')),
-      );
+      AppToast.success(context, _isEdit ? 'Task updated' : 'Task created');
       if (_isEdit) ref.invalidate(taskDetailProvider(widget.taskId!));
       context.pop();
     } else {
       final err = ref.read(taskFormProvider).error;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Save failed: $err')));
+      AppToast.error(context, 'Save failed', message: '$err');
     }
   }
 

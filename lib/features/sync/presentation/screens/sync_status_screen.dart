@@ -6,6 +6,7 @@ import '../../../../core/sync/sync_batch_status.dart';
 import '../../../../core/sync/sync_coordinator.dart';
 import '../../../../core/sync/sync_status_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/offline_banner.dart';
 import '../../../../core/widgets/stat_card.dart';
@@ -86,9 +87,8 @@ class SyncStatusScreen extends ConsumerWidget {
                       .syncNow();
                   ref.read(syncBatchesProvider.notifier).refresh();
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Sync triggered')),
-                    );
+                    AppToast.success(context, 'Sync triggered',
+                        message: 'Your queued data is being uploaded.');
                   }
                 },
               ),

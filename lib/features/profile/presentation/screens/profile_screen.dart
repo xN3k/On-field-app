@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/avatar_chip.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../auth/domain/entities/user.dart';
@@ -52,10 +53,11 @@ class ProfileScreen extends ConsumerWidget {
                   leading: const Icon(Icons.lock_outline),
                   title: const Text('Change Password'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Password changes are managed by your administrator.')),
+                  onTap: () => AppToast.info(
+                    context,
+                    'Change Password',
+                    message:
+                        'Password changes are managed by your administrator.',
                   ),
                 ),
                 const Divider(height: 1),

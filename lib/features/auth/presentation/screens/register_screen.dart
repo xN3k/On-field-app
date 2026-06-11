@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/di/core_providers.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/user.dart';
 
 /// Admin-provisioned account creation (manager/admin only).
@@ -49,9 +50,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         },
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created')),
-      );
+      AppToast.success(context, 'Account created');
       context.pop();
     } on DioException catch (e) {
       setState(() {

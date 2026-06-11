@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/offline_banner.dart';
 import '../providers/report_providers.dart';
 
@@ -36,10 +37,12 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
     if (!mounted) return;
     final state = ref.read(reportFormProvider);
     if (!state.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Report queued — will sync when online')),
-      );
+      AppToast.success(context, 'Report queued',
+          message: 'It will sync when you’re back online.');
       Navigator.of(context).pop();
+    } else {
+      AppToast.error(context, 'Could not save report',
+          message: 'Please try again.');
     }
   }
 

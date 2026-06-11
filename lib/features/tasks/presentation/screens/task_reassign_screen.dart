@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/avatar_chip.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../users/presentation/providers/user_providers.dart';
@@ -82,14 +83,13 @@ class _TaskReassignScreenState extends ConsumerState<TaskReassignScreen> {
                         .read(taskAssignProvider.notifier)
                         .assign(widget.taskId, _selectedId!);
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(ok
-                            ? 'Task reassigned'
-                            : 'Reassign failed — try again.'),
-                      ),
-                    );
-                    if (ok) context.pop();
+                    if (ok) {
+                      AppToast.success(context, 'Task reassigned');
+                      context.pop();
+                    } else {
+                      AppToast.error(context, 'Reassign failed',
+                          message: 'Please try again.');
+                    }
                   },
             child: assigning
                 ? const SizedBox(
