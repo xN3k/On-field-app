@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
+import '../../../../core/location/location_permission_service.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
@@ -26,17 +29,34 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  static const _initial = CameraPosition(
-    target: LatLng(37.7749, -122.4194),
-    zoom: 12,
-  );
+  static const _initialCenter = LatLng(37.7749, -122.4194);
 
-  final _markerIcons = <String, BitmapDescriptor>{};
+  final _mapController = MapController();
 
-  Future<void> _loadIcon(String userId, String initials) async {
-    if (_markerIcons.containsKey(userId)) return;
-    final icon = await initialsMarker(initials);
-    if (mounted) setState(() => _markerIcons[userId] = icon);
+  @override
+  void initState() {
+    super.initState();
+    // Request foreground location up front so the recenter button works and
+    // the team seed can use the device position.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) LocationPermissionService.ensureForeground(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _recenter() async {
+    if (!await LocationPermissionService.ensureForeground(context)) return;
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      _mapController.move(LatLng(pos.latitude, pos.longitude), 15);
+    } catch (_) {
+      // Position unavailable — leave the camera where it is.
+    }
   }
 
   void _showWorkerSheet(LocationPing ping) {
@@ -134,18 +154,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final radiusFilter = ref.watch(mapRadiusFilterProvider);
     final directory = ref.watch(userDirectoryProvider).value ?? const {};
 
-    final markers = <Marker>{};
-    final circles = <Circle>{};
-    final polylines = <Polyline>{};
+    final markers = <Marker>[];
+    final circles = <CircleMarker>[];
 
     final tasks = ref.watch(taskListProvider).value ?? const <Task>[];
     for (final t in tasks.where((t) => t.hasGeofence)) {
       final center = LatLng(t.geofenceLat!, t.geofenceLng!);
       final radius = (t.geofenceRadius ?? 100).toDouble();
-      circles.add(
-          geofenceCircle(id: 'geo_${t.id}', center: center, radiusMeters: radius));
-      polylines.add(geofenceOutline(
-          id: 'geo_${t.id}', center: center, radiusMeters: radius));
+      circles.add(geofenceCircle(center: center, radiusMeters: radius));
     }
 
     final team = isManager
@@ -156,13 +172,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (userId == null) continue;
       final name =
           p.name ?? directory[userId]?.name ?? p.email ?? userId;
-      _loadIcon(userId, AvatarChip.initialsOf(name));
       markers.add(
         Marker(
-          markerId: MarkerId('worker_$userId'),
-          position: LatLng(p.latitude, p.longitude),
-          icon: _markerIcons[userId] ?? BitmapDescriptor.defaultMarker,
-          onTap: () => _showWorkerSheet(p),
+          point: LatLng(p.latitude, p.longitude),
+          width: 44,
+          height: 44,
+          child: GestureDetector(
+            onTap: () => _showWorkerSheet(p),
+            child: initialsMarkerWidget(AvatarChip.initialsOf(name)),
+          ),
         ),
       );
     }
@@ -178,16 +196,25 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.small(
+        heroTag: 'map_recenter',
+        onPressed: _recenter,
+        child: const Icon(Icons.my_location),
+      ),
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: _initial,
-            markers: markers,
-            circles: circles,
-            polylines: polylines,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            padding: EdgeInsets.only(bottom: isManager ? 220 : 0),
+          FlutterMap(
+            mapController: _mapController,
+            options: const MapOptions(
+              initialCenter: _initialCenter,
+              initialZoom: 12,
+            ),
+            children: [
+              osmTileLayer(),
+              CircleLayer(circles: circles),
+              MarkerLayer(markers: markers),
+              osmAttribution(),
+            ],
           ),
           if (isManager)
             Positioned(

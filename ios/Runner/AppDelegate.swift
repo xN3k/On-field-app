@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import GoogleMaps
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -8,8 +7,7 @@ import GoogleMaps
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Replace the placeholder with a real Google Maps iOS API key.
-    GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
+    // Maps use OpenStreetMap tiles via flutter_map — no Google Maps SDK/key.
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

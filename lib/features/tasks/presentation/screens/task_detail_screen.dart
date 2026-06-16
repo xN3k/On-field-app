@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/location/geofence_helper.dart';
+import '../../../../core/location/location_permission_service.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/avatar_chip.dart';
@@ -420,6 +422,8 @@ class _GeofenceMapState extends State<_GeofenceMap> {
 
   Future<void> _checkZone() async {
     try {
+      if (!await LocationPermissionService.ensureForeground(context)) return;
+      if (!mounted) return;
       final pos = await Geolocator.getLastKnownPosition() ??
           await Geolocator.getCurrentPosition();
       if (!mounted) return;
@@ -447,28 +451,39 @@ class _GeofenceMapState extends State<_GeofenceMap> {
         height: 220,
         child: Stack(
           children: [
-            GoogleMap(
-              initialCameraPosition: CameraPosition(target: center, zoom: 15),
-              circles: {
-                geofenceCircle(
-                  id: task.id,
-                  center: center,
-                  radiusMeters: (task.geofenceRadius ?? 100).toDouble(),
+            FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 15,
+                interactionOptions:
+                    const InteractionOptions(flags: InteractiveFlag.none),
+              ),
+              children: [
+                osmTileLayer(),
+                CircleLayer(
+                  circles: [
+                    geofenceCircle(
+                      center: center,
+                      radiusMeters: (task.geofenceRadius ?? 100).toDouble(),
+                    ),
+                  ],
                 ),
-              },
-              polylines: {
-                geofenceOutline(
-                  id: task.id,
-                  center: center,
-                  radiusMeters: (task.geofenceRadius ?? 100).toDouble(),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: center,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: AppColors.primary,
+                        size: 40,
+                      ),
+                    ),
+                  ],
                 ),
-              },
-              markers: {
-                Marker(markerId: MarkerId(task.id), position: center),
-              },
-              zoomControlsEnabled: false,
-              myLocationButtonEnabled: false,
-              liteModeEnabled: true,
+                osmAttribution(),
+              ],
             ),
             if (_inside != null)
               Positioned(

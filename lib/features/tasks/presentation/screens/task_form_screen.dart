@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart' show Factory;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
@@ -177,35 +176,37 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               borderRadius: BorderRadius.circular(AppRadius.md),
               child: SizedBox(
                 height: 240,
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _pin ?? const LatLng(37.7749, -122.4194),
-                    zoom: _pin != null ? 15 : 11,
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: _pin ?? const LatLng(37.7749, -122.4194),
+                    initialZoom: _pin != null ? 15 : 11,
+                    onTap: (_, point) => setState(() => _pin = point),
                   ),
-                  onTap: (latLng) => setState(() => _pin = latLng),
-                  markers: {
+                  children: [
+                    osmTileLayer(),
                     if (_pin != null)
-                      Marker(
-                        markerId: const MarkerId('pin'),
-                        position: _pin!,
-                        draggable: true,
-                        onDragEnd: (latLng) => setState(() => _pin = latLng),
+                      CircleLayer(
+                        circles: [
+                          geofenceCircle(center: _pin!, radiusMeters: _radius),
+                        ],
                       ),
-                  },
-                  circles: {
                     if (_pin != null)
-                      geofenceCircle(
-                        id: 'pin',
-                        center: _pin!,
-                        radiusMeters: _radius,
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _pin!,
+                            width: 40,
+                            height: 40,
+                            child: const Icon(
+                              Icons.location_on,
+                              color: AppColors.primary,
+                              size: 40,
+                            ),
+                          ),
+                        ],
                       ),
-                  },
-                  zoomControlsEnabled: false,
-                  myLocationButtonEnabled: false,
-                  gestureRecognizers: {
-                    Factory<OneSequenceGestureRecognizer>(
-                        EagerGestureRecognizer.new),
-                  },
+                    osmAttribution(),
+                  ],
                 ),
               ),
             ),

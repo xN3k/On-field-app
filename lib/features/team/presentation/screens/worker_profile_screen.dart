@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../../core/widgets/map_overlays.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/avatar_chip.dart';
 import '../../../../core/widgets/report_card.dart';
@@ -84,16 +86,32 @@ class WorkerProfileScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       child: SizedBox(
                         height: 160,
-                        child: GoogleMap(
-                          initialCameraPosition:
-                              CameraPosition(target: pos, zoom: 14),
-                          markers: {
-                            Marker(
-                                markerId: MarkerId(userId), position: pos),
-                          },
-                          liteModeEnabled: true,
-                          zoomControlsEnabled: false,
-                          myLocationButtonEnabled: false,
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: pos,
+                            initialZoom: 14,
+                            interactionOptions: const InteractionOptions(
+                              flags: InteractiveFlag.none,
+                            ),
+                          ),
+                          children: [
+                            osmTileLayer(),
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: pos,
+                                  width: 40,
+                                  height: 40,
+                                  child: const Icon(
+                                    Icons.location_on,
+                                    color: AppColors.primary,
+                                    size: 40,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            osmAttribution(),
+                          ],
                         ),
                       ),
                     ),

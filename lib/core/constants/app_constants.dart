@@ -2,11 +2,6 @@
 class AppConstants {
   AppConstants._();
 
-  static const String googleMapsApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: '',
-  );
-
   /// How often the background service emits a location ping.
   static const Duration locationPingInterval = Duration(minutes: 15);
 

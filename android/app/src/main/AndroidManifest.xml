@@ -12,10 +12,7 @@
         android:label="onfield"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Google Maps API key. Replace the placeholder with a real key. -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
+        <!-- Maps use OpenStreetMap tiles via flutter_map — no API key needed. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

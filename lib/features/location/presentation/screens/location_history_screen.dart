@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/map_overlays.dart';
 import '../providers/location_providers.dart';
 
 /// Timeline of a worker's location pings with a path trace map.
@@ -38,25 +40,38 @@ class LocationHistoryScreen extends ConsumerWidget {
             children: [
               SizedBox(
                 height: 200,
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: points.first, zoom: 13),
-                  polylines: {
-                    Polyline(
-                      polylineId: PolylineId('trace_$userId'),
-                      points: points,
-                      color: AppColors.primary,
-                      width: 3,
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: points.first,
+                    initialZoom: 13,
+                  ),
+                  children: [
+                    osmTileLayer(),
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: points,
+                          color: AppColors.primary,
+                          strokeWidth: 3,
+                        ),
+                      ],
                     ),
-                  },
-                  markers: {
-                    Marker(
-                      markerId: const MarkerId('latest'),
-                      position: points.first,
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: points.first,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: AppColors.primary,
+                            size: 40,
+                          ),
+                        ),
+                      ],
                     ),
-                  },
-                  zoomControlsEnabled: false,
-                  myLocationButtonEnabled: false,
+                    osmAttribution(),
+                  ],
                 ),
               ),
               Expanded(
