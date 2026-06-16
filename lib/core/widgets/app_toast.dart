@@ -149,11 +149,11 @@ class _ToastWidgetState extends State<_ToastWidget>
     final style = _ToastStyle.of(widget.variant);
     final media = MediaQuery.of(context);
 
-    final titleColor = style.filled ? Colors.white : AppColors.onSurface;
+    final titleColor = style.filled ? Colors.white : context.colors.onSurface;
     final messageColor =
-        style.filled ? Colors.white.withValues(alpha: 0.85) : AppColors.onSurfaceVariant;
+        style.filled ? Colors.white.withValues(alpha: 0.85) : context.colors.onSurfaceVariant;
     final closeColor =
-        style.filled ? Colors.white.withValues(alpha: 0.85) : AppColors.onSurfaceVariant;
+        style.filled ? Colors.white.withValues(alpha: 0.85) : context.colors.onSurfaceVariant;
 
     return Positioned(
       top: media.padding.top + 12,
@@ -165,7 +165,7 @@ class _ToastWidgetState extends State<_ToastWidget>
           color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              color: style.filled ? style.accent : AppColors.surfaceContainerLowest,
+              color: style.filled ? style.accent : context.colors.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(AppRadius.md),
               boxShadow: AppShadows.elevated,
               border: style.filled

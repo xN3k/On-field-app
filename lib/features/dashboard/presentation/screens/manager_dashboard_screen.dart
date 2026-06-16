@@ -102,9 +102,9 @@ class ManagerDashboardScreen extends ConsumerWidget {
               child: Container(
                 height: 160,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHighest,
+                  color: context.colors.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: context.colors.border),
                 ),
                 child: const Center(
                   child: Column(

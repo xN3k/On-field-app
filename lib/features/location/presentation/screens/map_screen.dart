@@ -236,12 +236,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           label: Text(label),
                           selected: radiusFilter == meters,
                           showCheckmark: false,
-                          backgroundColor: AppColors.surfaceContainerLowest,
+                          backgroundColor: context.colors.surfaceContainerLowest,
                           selectedColor: AppColors.primary,
                           labelStyle: TextStyle(
                             color: radiusFilter == meters
                                 ? Colors.white
-                                : AppColors.onSurfaceVariant,
+                                : context.colors.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -285,10 +285,10 @@ class _WorkersSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         boxShadow: AppShadows.elevated,
       ),
       child: ListView(
@@ -300,7 +300,7 @@ class _WorkersSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.outlineVariant,
+                color: context.colors.outlineVariant,
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),

@@ -94,7 +94,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                         ? Icons.cloud_done_outlined
                         : Icons.cloud_off_outlined,
                 color: _healthy == null
-                    ? AppColors.onSurfaceVariant
+                    ? context.colors.onSurfaceVariant
                     : _healthy!
                         ? AppColors.success
                         : AppColors.error,

@@ -108,10 +108,13 @@ class _BatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (bg, fg) = switch (batch.status) {
-      'COMPLETED' => (AppColors.successContainer, AppColors.onSuccessContainer),
-      'FAILED' => (AppColors.errorContainer, AppColors.onErrorContainer),
-      'PROCESSING' => (AppColors.infoContainer, AppColors.primary),
-      _ => (AppColors.surfaceContainerHigh, AppColors.onSurfaceVariant),
+      'COMPLETED' => (
+          context.colors.successContainer,
+          context.colors.onSuccessContainer
+        ),
+      'FAILED' => (context.colors.errorContainer, context.colors.onErrorContainer),
+      'PROCESSING' => (context.colors.infoContainer, AppColors.primary),
+      _ => (context.colors.surfaceContainerHigh, context.colors.onSurfaceVariant),
     };
     return Card(
       child: Padding(

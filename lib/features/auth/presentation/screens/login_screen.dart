@@ -95,7 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: context.colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         boxShadow: AppShadows.elevated,
       ),
@@ -130,10 +130,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge
-                  ?.copyWith(color: AppColors.onSurfaceVariant),
+                  ?.copyWith(color: context.colors.onSurfaceVariant),
             ),
             const SizedBox(height: 28),
-            _fieldLabel('EMAIL ADDRESS'),
+            _fieldLabel(context, 'EMAIL ADDRESS'),
             const SizedBox(height: 6),
             TextFormField(
               controller: _email,
@@ -147,7 +147,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   : null,
             ),
             const SizedBox(height: 18),
-            _fieldLabel('PASSWORD'),
+            _fieldLabel(context, 'PASSWORD'),
             const SizedBox(height: 6),
             TextFormField(
               controller: _password,
@@ -212,13 +212,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _fieldLabel(String text) => Text(
+  Widget _fieldLabel(BuildContext context, String text) => Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
-          color: AppColors.onSurfaceVariant,
+          color: context.colors.onSurfaceVariant,
         ),
       );
 }

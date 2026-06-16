@@ -175,13 +175,13 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         selected: selected,
         showCheckmark: false,
         onSelected: (_) => setState(() => _filter = status),
-        backgroundColor: AppColors.surfaceContainerLowest,
+        backgroundColor: context.colors.surfaceContainerLowest,
         selectedColor: AppColors.primary,
         side: BorderSide(
-          color: selected ? AppColors.primary : AppColors.outlineVariant,
+          color: selected ? AppColors.primary : context.colors.outlineVariant,
         ),
         labelStyle: TextStyle(
-          color: selected ? Colors.white : AppColors.onSurfaceVariant,
+          color: selected ? Colors.white : context.colors.onSurfaceVariant,
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
@@ -203,14 +203,14 @@ class _TaskCard extends ConsumerWidget {
     final accent = switch (task.status) {
       TaskStatus.inProgress => AppColors.primary,
       TaskStatus.completed => AppColors.success,
-      TaskStatus.pending => AppColors.outlineVariant,
+      TaskStatus.pending => context.colors.outlineVariant,
     };
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: context.colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
         boxShadow: AppShadows.card,
       ),
       clipBehavior: Clip.antiAlias,
@@ -233,8 +233,8 @@ class _TaskCard extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today_outlined,
-                            size: 15, color: AppColors.onSurfaceVariant),
+                        Icon(Icons.calendar_today_outlined,
+                            size: 15, color: context.colors.onSurfaceVariant),
                         const SizedBox(width: 6),
                         Text(
                           'Assigned: ${_fmtDate(task.createdAt!)}',
@@ -249,7 +249,7 @@ class _TaskCard extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerLow,
+                        color: context.colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(AppRadius.base),
                       ),
                       child: Row(

@@ -202,6 +202,7 @@ class _TaskBody extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         _card(
+          context,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -277,10 +278,11 @@ class _TaskBody extends ConsumerWidget {
 
         if (task.description != null) ...[
           _card(
+            context,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionLabel('DESCRIPTION'),
+                _sectionLabel(context, 'DESCRIPTION'),
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 12),
@@ -298,10 +300,11 @@ class _TaskBody extends ConsumerWidget {
         ],
 
         _card(
+          context,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionLabel('REPORTS'),
+              _sectionLabel(context, 'REPORTS'),
               const SizedBox(height: 12),
               ...reportsAsync.when(
                 loading: () => const [LinearProgressIndicator()],
@@ -332,13 +335,13 @@ class _TaskBody extends ConsumerWidget {
     );
   }
 
-  Widget _sectionLabel(String text) => Text(
+  Widget _sectionLabel(BuildContext context, String text) => Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          color: AppColors.onSurfaceVariant,
+          color: context.colors.onSurfaceVariant,
         ),
       );
 
@@ -351,42 +354,42 @@ class _TaskBody extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: context.colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
         boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [
-          Icon(icon, color: AppColors.onSurfaceVariant),
+          Icon(icon, color: context.colors.onSurfaceVariant),
           const SizedBox(height: 8),
           Text(label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
-                color: AppColors.onSurfaceVariant,
+                color: context.colors.onSurfaceVariant,
               )),
           const SizedBox(height: 4),
           Text(value,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.onSurface,
+                color: context.colors.onSurface,
               )),
         ],
       ),
     );
   }
 
-  Widget _card({required Widget child}) {
+  Widget _card(BuildContext context, {required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: context.colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
         boxShadow: AppShadows.card,
       ),
       child: child,
@@ -494,8 +497,8 @@ class _GeofenceMapState extends State<_GeofenceMap> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: _inside!
-                        ? AppColors.successContainer
-                        : AppColors.surfaceContainerHigh,
+                        ? context.colors.successContainer
+                        : context.colors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: Text(
@@ -504,8 +507,8 @@ class _GeofenceMapState extends State<_GeofenceMap> {
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: _inside!
-                          ? AppColors.onSuccessContainer
-                          : AppColors.onSurfaceVariant,
+                          ? context.colors.onSuccessContainer
+                          : context.colors.onSurfaceVariant,
                     ),
                   ),
                 ),

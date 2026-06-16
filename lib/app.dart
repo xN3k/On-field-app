@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/sync/sync_coordinator.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'features/notifications/presentation/providers/notification_providers.dart';
 
 class OnFieldApp extends ConsumerWidget {
@@ -17,12 +18,14 @@ class OnFieldApp extends ConsumerWidget {
     ref.watch(notificationCenterProvider);
 
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
       title: 'OnField',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

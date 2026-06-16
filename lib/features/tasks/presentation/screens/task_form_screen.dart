@@ -183,9 +183,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
+                  color: context.colors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(AppRadius.base),
-                  border: Border.all(color: AppColors.outlineVariant),
+                  border: Border.all(color: context.colors.outlineVariant),
                 ),
                 child: Row(
                   children: [
@@ -202,13 +202,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                             'Select a worker…',
                         style: TextStyle(
                           color: _assignee == null
-                              ? AppColors.outline
-                              : AppColors.onSurface,
+                              ? context.colors.outline
+                              : context.colors.onSurface,
                         ),
                       ),
                     ),
-                    const Icon(Icons.expand_more,
-                        color: AppColors.onSurfaceVariant),
+                    Icon(Icons.expand_more,
+                        color: context.colors.onSurfaceVariant),
                   ],
                 ),
               ),
@@ -243,9 +243,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               Container(
                 margin: const EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLowest,
+                  color: context.colors.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(AppRadius.base),
-                  border: Border.all(color: AppColors.outlineVariant),
+                  border: Border.all(color: context.colors.outlineVariant),
                 ),
                 child: Column(
                   children: [

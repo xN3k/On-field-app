@@ -52,10 +52,10 @@ class AvatarChip extends StatelessWidget {
             width: radius * 0.55,
             height: radius * 0.55,
             decoration: BoxDecoration(
-              color: online! ? AppColors.success : AppColors.pendingGray,
+              color: online! ? AppColors.success : context.colors.pendingGray,
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.surfaceContainerLowest,
+                color: context.colors.surfaceContainerLowest,
                 width: 2,
               ),
             ),

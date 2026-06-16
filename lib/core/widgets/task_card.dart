@@ -22,7 +22,7 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final stripe = StatusBadge.color(task.status);
+    final stripe = StatusBadge.color(context, task.status);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -68,10 +68,10 @@ class TaskCard extends StatelessWidget {
                             const SizedBox(width: 12),
                           ],
                           if (task.createdAt != null) ...[
-                            const Icon(
+                            Icon(
                               Icons.event,
                               size: 14,
-                              color: AppColors.onSurfaceVariant,
+                              color: context.colors.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -103,12 +103,12 @@ class TaskCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(right: 8),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
                 child: Center(
                   child: Icon(
                     Icons.chevron_right,
-                    color: AppColors.outlineVariant,
+                    color: context.colors.outlineVariant,
                   ),
                 ),
               ),

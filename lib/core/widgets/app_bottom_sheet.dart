@@ -11,7 +11,7 @@ Future<T?> showAppSheet<T>(
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
-    backgroundColor: AppColors.surfaceContainerLowest,
+    backgroundColor: context.colors.surfaceContainerLowest,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
     ),
@@ -27,7 +27,7 @@ Future<T?> showAppSheet<T>(
               height: 4,
               margin: const EdgeInsets.only(top: 10, bottom: 6),
               decoration: BoxDecoration(
-                color: AppColors.outlineVariant,
+                color: context.colors.outlineVariant,
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),

@@ -21,7 +21,7 @@ class OfflineBanner extends ConsumerWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppColors.warningContainer,
+      color: context.colors.warningContainer,
       child: Row(
         children: [
           const Icon(Icons.wifi_off, size: 18, color: AppColors.warning),

@@ -57,7 +57,7 @@ class WorkerProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Pill(
                     label: user.role.wire,
-                    background: AppColors.infoContainer,
+                    background: context.colors.infoContainer,
                     foreground: AppColors.primary,
                   ),
                 ],

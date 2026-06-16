@@ -59,20 +59,20 @@ class ReportCard extends StatelessWidget {
               Row(
                 children: [
                   if (workerName != null) ...[
-                    const Icon(
+                    Icon(
                       Icons.person_outline,
                       size: 14,
-                      color: AppColors.onSurfaceVariant,
+                      color: context.colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
                     Text(workerName!, style: text.bodyMedium),
                     const SizedBox(width: 12),
                   ],
                   if (report.createdAt != null) ...[
-                    const Icon(
+                    Icon(
                       Icons.schedule,
                       size: 14,
-                      color: AppColors.onSurfaceVariant,
+                      color: context.colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
                     Text(

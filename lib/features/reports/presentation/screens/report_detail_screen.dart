@@ -109,9 +109,9 @@ class ReportDetailScreen extends ConsumerWidget {
                           title: Text(entry.key),
                           trailing: Text(
                             '${entry.value}',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.onSurface),
+                                color: context.colors.onSurface),
                           ),
                         ),
                     ],

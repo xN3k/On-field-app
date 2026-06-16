@@ -76,8 +76,8 @@ class TeamScreen extends ConsumerWidget {
                     ),
                     trailing: Pill(
                       label: u.role.wire,
-                      background: AppColors.surfaceContainerHigh,
-                      foreground: AppColors.onSurfaceVariant,
+                      background: context.colors.surfaceContainerHigh,
+                      foreground: context.colors.onSurfaceVariant,
                     ),
                     onTap: () =>
                         context.push(Routes.workerProfilePath(u.id)),

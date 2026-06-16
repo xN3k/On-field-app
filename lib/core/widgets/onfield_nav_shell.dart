@@ -56,9 +56,9 @@ class OnFieldNavShell extends ConsumerWidget {
     return Scaffold(
       body: shell,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: context.colors.surfaceContainerLowest,
+          border: Border(top: BorderSide(color: context.colors.border)),
         ),
         child: SafeArea(
           top: false,
@@ -95,7 +95,7 @@ class OnFieldNavShell extends ConsumerWidget {
               child: Icon(
                 tab.icon,
                 size: 24,
-                color: selected ? Colors.white : AppColors.onSurfaceVariant,
+                color: selected ? Colors.white : context.colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 4),
@@ -105,7 +105,7 @@ class OnFieldNavShell extends ConsumerWidget {
                 fontSize: 12,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color:
-                    selected ? AppColors.primary : AppColors.onSurfaceVariant,
+                    selected ? AppColors.primary : context.colors.onSurfaceVariant,
               ),
             ),
           ],

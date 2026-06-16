@@ -11,8 +11,9 @@ class StatusBadge extends StatelessWidget {
   final TaskStatus status;
 
   /// Stripe / accent color associated with a task status.
-  static Color color(TaskStatus status) => switch (status) {
-        TaskStatus.pending => AppColors.pendingGray,
+  static Color color(BuildContext context, TaskStatus status) =>
+      switch (status) {
+        TaskStatus.pending => context.colors.pendingGray,
         TaskStatus.inProgress => AppColors.warning,
         TaskStatus.completed => AppColors.success,
       };
@@ -21,13 +22,13 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (status) {
       TaskStatus.pending => (
-          AppColors.surfaceContainerHigh,
-          AppColors.onSurfaceVariant,
+          context.colors.surfaceContainerHigh,
+          context.colors.onSurfaceVariant,
         ),
-      TaskStatus.inProgress => (AppColors.warningContainer, AppColors.warning),
+      TaskStatus.inProgress => (context.colors.warningContainer, AppColors.warning),
       TaskStatus.completed => (
-          AppColors.successContainer,
-          AppColors.onSuccessContainer,
+          context.colors.successContainer,
+          context.colors.onSuccessContainer,
         ),
     };
     return Pill(label: status.label, background: bg, foreground: fg);
@@ -46,20 +47,20 @@ class SyncStatusBadge extends StatelessWidget {
       SyncStatus.synced => (
           'Synced',
           Icons.check_circle_outline,
-          AppColors.successContainer,
-          AppColors.onSuccessContainer,
+          context.colors.successContainer,
+          context.colors.onSuccessContainer,
         ),
       SyncStatus.pending => (
           'Pending',
           Icons.schedule,
-          AppColors.warningContainer,
+          context.colors.warningContainer,
           AppColors.warning,
         ),
       SyncStatus.failed => (
           'Failed',
           Icons.error_outline,
-          AppColors.errorContainer,
-          AppColors.onErrorContainer,
+          context.colors.errorContainer,
+          context.colors.onErrorContainer,
         ),
     };
     return Pill(label: label, icon: icon, background: bg, foreground: fg);

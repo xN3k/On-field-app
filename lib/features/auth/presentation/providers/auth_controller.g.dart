@@ -39,7 +39,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'80d9c5ff07f6a7ea9f03f1ebc4347d5b2f9aab17';
+String _$authControllerHash() => r'4cf9c307c317c60b4e364f124b0b58a0ed133cb8';
 
 /// Holds the session and drives router redirects. Kept alive for the app's
 /// lifetime so the socket connection and session survive navigation.

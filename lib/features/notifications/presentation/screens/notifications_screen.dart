@@ -70,14 +70,14 @@ class _NotificationTile extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: notification.read
-            ? AppColors.surfaceContainerLowest
+            ? context.colors.surfaceContainerLowest
             : AppColors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border(
           left: BorderSide(color: accent, width: 4),
-          top: const BorderSide(color: AppColors.border),
-          right: const BorderSide(color: AppColors.border),
-          bottom: const BorderSide(color: AppColors.border),
+          top: BorderSide(color: context.colors.border),
+          right: BorderSide(color: context.colors.border),
+          bottom: BorderSide(color: context.colors.border),
         ),
       ),
       child: ListTile(
