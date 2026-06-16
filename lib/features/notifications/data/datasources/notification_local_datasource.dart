@@ -13,12 +13,33 @@ class NotificationLocalDataSource {
   static const _max = 100;
 
   List<AppNotificationModel> getAll() {
-    final items = _box.values
-        .map((s) =>
-            AppNotificationModel.fromJson(jsonDecode(s) as Map<String, dynamic>))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final items = <AppNotificationModel>[];
+    final junkKeys = <dynamic>[];
+    for (final key in _box.keys) {
+      final raw = _box.get(key);
+      final n = raw == null ? null : _tryParse(raw);
+      // Drop malformed or content-less entries (e.g. stragglers from an older
+      // schema or a bad socket payload) so they never render as a blank card.
+      if (n != null && (n.title.isNotEmpty || n.body.isNotEmpty)) {
+        items.add(n);
+      } else {
+        junkKeys.add(key);
+      }
+    }
+    if (junkKeys.isNotEmpty) {
+      _box.deleteAll(junkKeys); // fire-and-forget cleanup
+    }
+    items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return items;
+  }
+
+  AppNotificationModel? _tryParse(String s) {
+    try {
+      return AppNotificationModel.fromJson(
+          jsonDecode(s) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> add(AppNotificationModel notification) async {

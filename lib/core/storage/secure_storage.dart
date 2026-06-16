@@ -22,8 +22,7 @@ class SecureStorage {
 
   Future<String?> readRefreshToken() => _storage.read(key: _refreshKey);
 
-  Future<void> clear() async {
-    await _storage.delete(key: _accessKey);
-    await _storage.delete(key: _refreshKey);
-  }
+  /// Wipes all secure entries (not just the known token keys) so logout and
+  /// the fresh-install purge leave nothing behind in the Keychain/KeyStore.
+  Future<void> clear() => _storage.deleteAll();
 }

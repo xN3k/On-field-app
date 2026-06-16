@@ -10,6 +10,7 @@ class AuthLocalDataSource {
 
   final Box<String> _box;
   static const _key = 'current';
+  static const _installedKey = 'installed_flag';
 
   Future<void> cacheUser(UserModel user) async {
     await _box.put(_key, jsonEncode(user.toJson()));
@@ -22,4 +23,11 @@ class AuthLocalDataSource {
   }
 
   Future<void> clear() => _box.delete(_key);
+
+  /// True until [markInstalled] runs. Hive lives in the app's data directory,
+  /// which the OS wipes on uninstall — so a missing flag means this is a fresh
+  /// install (and any tokens left in the iOS Keychain are stale).
+  bool isFreshInstall() => _box.get(_installedKey) == null;
+
+  Future<void> markInstalled() => _box.put(_installedKey, '1');
 }

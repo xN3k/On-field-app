@@ -47,21 +47,32 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> currentUser() async {
-    final cached = local.getCachedUser();
-    if (cached != null) return cached;
-    if (await hasSession()) {
-      try {
-        final user = await remote.me();
-        await local.cacheUser(user);
-        return user;
-      } catch (_) {
-        // Stale/expired session that couldn't be refreshed — treat as
-        // logged-out rather than crashing the bootstrap.
-        await storage.clear();
-        return null;
-      }
+    // On a fresh install the Hive cache is gone but the iOS Keychain survives,
+    // so any tokens it still holds belong to a previous install — purge them
+    // before we'd ever trust them.
+    if (local.isFreshInstall()) {
+      await storage.clear();
+      await local.clear();
+      await local.markInstalled();
+      return null;
     }
-    return null;
+
+    // No token at all → definitely logged out; skip the network round-trip.
+    if (!await hasSession()) return null;
+
+    // The backend is the single source of truth. Always verify the token with
+    // /auth/me — a locally cached user is never trusted on its own. The Dio
+    // auth interceptor transparently refreshes a 401 and retries; if that also
+    // fails, me() throws and we clear the (now-invalid) session.
+    try {
+      final user = await remote.me();
+      await local.cacheUser(user);
+      return user;
+    } catch (_) {
+      await storage.clear();
+      await local.clear();
+      return null;
+    }
   }
 
   @override
