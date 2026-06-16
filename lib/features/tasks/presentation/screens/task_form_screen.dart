@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/location/geocoding_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -28,11 +29,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _searchController = TextEditingController();
+  final _mapController = MapController();
 
   User? _assignee;
   LatLng? _pin;
   double _radius = 100;
   bool _seeded = false;
+
+  List<GeocodingResult> _results = const [];
+  bool _searching = false;
 
   bool get _isEdit => widget.taskId != null;
 
@@ -40,7 +46,41 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _searchController.dispose();
+    _mapController.dispose();
     super.dispose();
+  }
+
+  Future<void> _searchAddress() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _searching = true);
+    try {
+      final results = await GeocodingService.search(query);
+      if (!mounted) return;
+      if (results.isEmpty) {
+        AppToast.info(context, 'No matches', message: 'Try a different address.');
+      }
+      setState(() => _results = results);
+    } catch (e) {
+      if (mounted) {
+        AppToast.error(context, 'Search failed', message: '$e');
+      }
+    } finally {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  void _selectResult(GeocodingResult r) {
+    final point = LatLng(r.latitude, r.longitude);
+    setState(() {
+      _pin = point;
+      _results = const [];
+      _searchController.text = r.displayName;
+    });
+    _mapController.move(point, 15);
+    FocusScope.of(context).unfocus();
   }
 
   Future<void> _pickWorker() async {
@@ -172,11 +212,61 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
             Text('Geofence Location *',
                 style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
+            TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => _searchAddress(),
+              decoration: InputDecoration(
+                hintText: 'Search address or place…',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searching
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: _searchAddress,
+                      ),
+              ),
+            ),
+            if (_results.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(AppRadius.base),
+                  border: Border.all(color: AppColors.outlineVariant),
+                ),
+                child: Column(
+                  children: [
+                    for (final r in _results)
+                      ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.location_on_outlined,
+                            color: AppColors.primary),
+                        title: Text(
+                          r.displayName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        onTap: () => _selectResult(r),
+                      ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 8),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.md),
               child: SizedBox(
                 height: 240,
                 child: FlutterMap(
+                  mapController: _mapController,
                   options: MapOptions(
                     initialCenter: _pin ?? const LatLng(37.7749, -122.4194),
                     initialZoom: _pin != null ? 15 : 11,
