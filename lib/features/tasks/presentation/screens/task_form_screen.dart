@@ -79,8 +79,13 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       _results = const [];
       _searchController.text = r.displayName;
     });
-    _mapController.move(point, 15);
     FocusScope.of(context).unfocus();
+    // Move after the frame so the map has rebuilt and the tile layer refetches
+    // for the new region — moving synchronously inside setState leaves the
+    // tiles blank.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapController.move(point, 15);
+    });
   }
 
   Future<void> _pickWorker() async {
