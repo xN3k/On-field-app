@@ -67,28 +67,16 @@ class _NotificationTile extends ConsumerWidget {
         (Icons.assignment_outlined, AppColors.primary),
     };
 
-    return Container(
-      decoration: BoxDecoration(
-        color: notification.read
-            ? context.colors.surfaceContainerLowest
-            : AppColors.primary.withValues(alpha: 0.06),
+    final title = notification.displayTitle;
+    final body = notification.displayBody;
+
+    return Material(
+      color: notification.read
+          ? context.colors.surfaceContainerLowest
+          : AppColors.primary.withValues(alpha: 0.06),
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border(
-          left: BorderSide(color: accent, width: 4),
-          top: BorderSide(color: context.colors.border),
-          right: BorderSide(color: context.colors.border),
-          bottom: BorderSide(color: context.colors.border),
-        ),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: accent),
-        title: Text(notification.title,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(
-          '${notification.body}\n'
-          '${DateFormat.yMMMd().add_jm().format(notification.createdAt)}',
-        ),
-        isThreeLine: true,
         onTap: () {
           ref
               .read(notificationLocalDataSourceProvider)
@@ -98,6 +86,58 @@ class _NotificationTile extends ConsumerWidget {
             context.push(Routes.taskDetailPath(taskId));
           }
         },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border(
+              left: BorderSide(color: accent, width: 4),
+              top: BorderSide(color: context.colors.border),
+              right: BorderSide(color: context.colors.border),
+              bottom: BorderSide(color: context.colors.border),
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: accent),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: context.colors.onSurface,
+                      ),
+                    ),
+                    if (body.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        body,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.colors.onSurface,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat.yMMMd().add_jm().format(notification.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

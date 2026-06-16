@@ -18,9 +18,10 @@ class NotificationLocalDataSource {
     for (final key in _box.keys) {
       final raw = _box.get(key);
       final n = raw == null ? null : _tryParse(raw);
-      // Drop malformed or content-less entries (e.g. stragglers from an older
-      // schema or a bad socket payload) so they never render as a blank card.
-      if (n != null && (n.title.isNotEmpty || n.body.isNotEmpty)) {
+      // Drop only truly malformed (unparseable) entries. Parseable rows always
+      // render via displayTitle/displayBody, which derive a type-based label
+      // when the stored title/body is empty (older schema / bad payloads).
+      if (n != null) {
         items.add(n);
       } else {
         junkKeys.add(key);
